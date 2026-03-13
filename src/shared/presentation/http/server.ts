@@ -27,6 +27,7 @@ import { RevokeTokenUseCase } from '../../../modules/credential/application/use-
 import { RevokeAllTokensUseCase } from '../../../modules/credential/application/use-cases/RevokeAllTokens.usecase.js';
 import { ChangePasswordUseCase } from '../../../modules/credential/application/use-cases/ChangePassword.usecase.js';
 import { ChangeUsernameUseCase } from '../../../modules/credential/application/use-cases/ChangeUsername.usecase.js';
+import { ResetPasswordUseCase } from '../../../modules/credential/application/use-cases/ResetPassword.usecase.js';
 import { createCredentialRoutes } from '../../../modules/credential/presentation/http/credential.routes.js';
 // Identity
 import { PostgresIdentityRepository } from '../../../modules/identity/infrastructure/persistence/PostgresIdentityRepository.js';
@@ -108,9 +109,17 @@ export function createApp(): Hono {
   const signIn = new SignInUseCase(credentialRepo, sessionRepo, passwordHasher, tokenService, accountQueryAdapter);
   const refreshToken = new RefreshTokenUseCase(credentialRepo, sessionRepo, tokenService, accountQueryAdapter);
   const revokeToken = new RevokeTokenUseCase(sessionRepo);
-  const _revokeAllTokens = new RevokeAllTokensUseCase(credentialRepo, sessionRepo);
-  const _changePassword = new ChangePasswordUseCase(credentialRepo, sessionRepo, passwordHasher);
-  const _changeUsername = new ChangeUsernameUseCase(credentialRepo, reservedList);
+  const revokeAllTokensUseCase = new RevokeAllTokensUseCase(credentialRepo, sessionRepo);
+  const changePasswordUseCase = new ChangePasswordUseCase(credentialRepo, sessionRepo, passwordHasher);
+  const changeUsernameUseCase = new ChangeUsernameUseCase(credentialRepo, reservedList);
+  const resetPasswordUseCase = new ResetPasswordUseCase(
+    verificationRepo,
+    hasher,
+    identityRepo,
+    credentialRepo,
+    sessionRepo,
+    passwordHasher,
+  );
 
   // ── Identity use cases ────────────────────────────────────────────
   const createIdentityUseCase = new CreateIdentityUseCase(identityRepo);
@@ -129,7 +138,16 @@ export function createApp(): Hono {
   const verificationRoutes = createVerificationRoutes(requestVerification, verifyEmail);
   app.route('/verification', verificationRoutes);
 
-  const credentialRoutes = createCredentialRoutes(signIn, refreshToken, revokeToken);
+  const credentialRoutes = createCredentialRoutes(
+    signIn,
+    refreshToken,
+    revokeToken,
+    changePasswordUseCase,
+    revokeAllTokensUseCase,
+    changeUsernameUseCase,
+    resetPasswordUseCase,
+    requestVerification,
+  );
   app.route('/auth', credentialRoutes);
 
   const accountRoutes = createAccountRoutes(
@@ -175,6 +193,14 @@ export function startServer(port: number): AppContext {
   console.log(`║  POST   http://localhost:${port}/verification/email           ║`);
   console.log(`║  POST   http://localhost:${port}/verification/email/verify    ║`);
   console.log(`║  POST   http://localhost:${port}/register                     ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/sign-in                 ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/refresh                 ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/sign-out                ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/sign-out/all            ║`);
+  console.log(`║  PATCH  http://localhost:${port}/auth/change-password         ║`);
+  console.log(`║  PATCH  http://localhost:${port}/auth/change-username         ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/forgot-password         ║`);
+  console.log(`║  POST   http://localhost:${port}/auth/reset-password          ║`);
   console.log('╚══════════════════════════════════════════════════════════╝\n');
 
   return { app, server };
