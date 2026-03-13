@@ -9,6 +9,13 @@ import {
   InvalidOtpError,
   EmailDeliveryError,
 } from '../../../modules/verification/domain/errors/Verification.errors.js';
+import {
+  IdentityNotFoundError,
+  EmailAlreadyRegisteredError,
+  PhoneAlreadyRegisteredError,
+  EmailNotVerifiedError,
+  BlnkRefAlreadyAssignedError,
+} from '../../../modules/identity/domain/errors/Identity.errors.js';
 
 interface ErrorResponse {
   error: string;
@@ -90,6 +97,56 @@ export function errorHandler(err: Error, c: Context): Response {
         message: err.message,
       },
       503,
+    );
+  }
+
+  if (err instanceof IdentityNotFoundError) {
+    return c.json<ErrorResponse>(
+      {
+        error: 'IDENTITY_NOT_FOUND',
+        message: err.message,
+      },
+      404,
+    );
+  }
+
+  if (err instanceof EmailAlreadyRegisteredError) {
+    return c.json<ErrorResponse>(
+      {
+        error: 'EMAIL_ALREADY_REGISTERED',
+        message: err.message,
+      },
+      409,
+    );
+  }
+
+  if (err instanceof PhoneAlreadyRegisteredError) {
+    return c.json<ErrorResponse>(
+      {
+        error: 'PHONE_ALREADY_REGISTERED',
+        message: err.message,
+      },
+      409,
+    );
+  }
+
+  if (err instanceof EmailNotVerifiedError) {
+    return c.json<ErrorResponse>(
+      {
+        error: 'EMAIL_NOT_VERIFIED',
+        message: err.message,
+      },
+      422,
+    );
+  }
+
+  if (err instanceof BlnkRefAlreadyAssignedError) {
+    return c.json<ErrorResponse>(
+      {
+        error: 'BLNK_REF_ALREADY_ASSIGNED',
+        message: err.message,
+      },
+      409,
     );
   }
 
