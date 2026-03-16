@@ -15,6 +15,7 @@ import { PostgresEmailEventRepository } from '../../../modules/verification/infr
 import { HmacOtpHasher } from '../../../modules/verification/infrastructure/adapters/HmacOtpHasher.js';
 import { CryptoOtpGenerator } from '../../../modules/verification/infrastructure/adapters/CryptoOtpGenerator.js';
 import { StubEmailSender } from '../../../modules/verification/infrastructure/adapters/StubEmailSender.js';
+import { NodemailerEmailSender } from '../../../modules/verification/infrastructure/adapters/NodemailerEmailSender.js';
 import { PostgresTransactionRunner } from '../../../modules/verification/infrastructure/adapters/PostgresTransactionRunner.js';
 import { pgPool } from '../../infrastructure/db/pgPool.js';
 // Credential
@@ -87,7 +88,17 @@ export function createApp(): Hono {
   const eventRepo = new PostgresEmailEventRepository(pgPool);
   const hasher = new HmacOtpHasher();
   const generator = new CryptoOtpGenerator();
-  const emailSender = new StubEmailSender();
+  const smtpHost = process.env['SMTP_HOST'];
+  const emailSender = smtpHost
+    ? new NodemailerEmailSender({
+        host: smtpHost,
+        port: Number(process.env['SMTP_PORT'] ?? '25'),
+        secure: process.env['SMTP_SECURE'] === 'true',
+        user: process.env['SMTP_USER'],
+        pass: process.env['SMTP_PASS'],
+        from: process.env['SMTP_FROM'] ?? 'noreply@chabit.com',
+      })
+    : new StubEmailSender();
 
   // ── Use cases ─────────────────────────────────────────────────────
   const requestVerification = new RequestEmailVerificationUseCase(
