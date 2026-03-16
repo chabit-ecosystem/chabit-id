@@ -97,6 +97,15 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 OTP_HMAC_SECRET=change-me-in-production
 JWT_SECRET=change-me-in-production
 LOG_LEVEL=info
+
+# Email (SMTP)
+# Si no se configura SMTP_HOST, el servidor loggea el OTP en consola (modo desarrollo)
+SMTP_HOST=localhost      # host del servidor Postfix
+SMTP_PORT=25             # 25 (local), 587 (STARTTLS), 465 (TLS)
+SMTP_SECURE=false        # true solo para puerto 465
+SMTP_FROM=noreply@chabit.com
+# SMTP_USER=             # opcional, si el relay requiere autenticación
+# SMTP_PASS=             # opcional
 ```
 
 ### Instalación y arranque
@@ -167,6 +176,7 @@ Cada test E2E crea su propia instancia de la app con repos en memoria, completam
 | `RegisterSaga` con compensaciones | Consistencia eventual: si falla un paso, se hace hardDelete de lo creado |
 | `StubEmailSender` con `sentEmails[]` | Permite capturar OTPs en tests E2E sin mockear el módulo |
 | Rate limiters dentro de factory functions | Evita estado compartido entre instancias de test |
+| Selección de EmailSender por `SMTP_HOST` | Si no está configurado cae al Stub — sin cambios de código entre dev y prod |
 
 ## Estructura de módulos
 
