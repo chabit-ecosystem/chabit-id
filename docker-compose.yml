@@ -32,6 +32,12 @@ services:
       OTP_HMAC_SECRET: ${OTP_HMAC_SECRET}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      WEBHOOK_BACKEND_URL: ${WEBHOOK_BACKEND_URL:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-25}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_FROM: ${SMTP_FROM:-noreply@chabit.com}
     depends_on:
       postgres:
         condition: service_healthy
