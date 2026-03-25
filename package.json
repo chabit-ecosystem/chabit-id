@@ -8,7 +8,8 @@
     "build": "tsc && cp -r src/shared/infrastructure/db/migrations dist/shared/infrastructure/db/migrations",
     "test": "vitest run",
     "test:watch": "vitest",
-    "migrate": "tsx src/shared/infrastructure/db/run-migrations.ts"
+    "migrate": "tsx src/shared/infrastructure/db/run-migrations.ts",
+    "seed": "tsx src/seed.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
