@@ -23,6 +23,7 @@ export class NodemailerEmailSender implements EmailSender {
       host: config.host,
       port: config.port,
       secure: config.secure,
+      tls: { rejectUnauthorized: false },
       ...(config.user && config.pass
         ? { auth: { user: config.user, pass: config.pass } }
         : {}),
