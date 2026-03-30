@@ -119,7 +119,7 @@ async function seedUser(
   const otp = emailSender.getLastCode(user.email);
   if (!otp) throw new Error(`No OTP captured for ${user.email}`);
 
-  await verifyEmail.execute({ verificationId, otp });
+  await verifyEmail.execute({ email: user.email, code: otp });
 
   // Step 3 — run the RegisterSaga (creates identity + credential + USER account + signs in)
   const tokens = await registerSaga.execute({
@@ -156,7 +156,7 @@ async function seedUser(
       (await import('./modules/account/domain/value-objects/AccountType.vo.js')).AccountType.organizer(),
     );
     if (orgAccount && !orgAccount.getStatus().isActive()) {
-      await approveOrganizer.execute({ identityRef, callerRef: adminIdentityRef ?? identityRef });
+      await approveOrganizer.execute({ accountId: orgAccount.getId().toPrimitive(), callerRef: adminIdentityRef ?? identityRef });
     }
   }
 
@@ -207,7 +207,7 @@ async function main() {
   // Attach eventRepo to accountRepo so seedUser can reach it (hack for seed only)
   (accountRepo as any).eventRepo = accountEventRepo;
 
-  const webhookSender = new HttpWebhookSender();
+  const webhookSender = new HttpWebhookSender(process.env.WEBHOOK_SECRET ?? 'seed-secret');
 
   // ── Wire use cases ────────────────────────────────────────────────────────
   const requestVerification = new RequestEmailVerificationUseCase(
