@@ -74,7 +74,11 @@ export function createApp(): Hono {
 
   // ── Docs ──────────────────────────────────────────────────────────
   app.get('/docs', swaggerUI({ url: '/docs/spec' }));
-  app.get('/docs/spec', (c) => c.json(openApiSpec));
+  app.get('/docs/spec', (c) => {
+    const host = c.req.header('host') ?? `localhost:${process.env.PORT ?? 3001}`;
+    const proto = c.req.header('x-forwarded-proto') ?? 'http';
+    return c.json({ ...openApiSpec, servers: [{ url: `${proto}://${host}`, description: 'Current server' }] });
+  });
 
   // ── HTTP request logging ───────────────────────────────────────────
   app.use('*', async (c, next) => {
