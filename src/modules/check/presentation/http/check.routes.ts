@@ -32,7 +32,7 @@ export function createCheckRoutes(
     }),
     async (c) => {
       const { value } = c.req.valid('query');
-      const existing = await credentialRepo.findByUsername(Username.fromPrimitive(value.trim().toLowerCase()));
+      const existing = await credentialRepo.findByUsername(Username.fromPrimitive(value));
       return c.json({ available: existing === null }, 200);
     },
   );
