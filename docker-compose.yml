@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: chabit-id-postgres
     environment:
       POSTGRES_USER: chabit
       POSTGRES_PASSWORD: chabit
@@ -54,7 +55,7 @@ services:
       target: builder
     command: npx tsx src/seed.ts
     environment:
-      PG_HOST: postgres
+      PG_HOST: chabit-id-postgres
       PG_PORT: 5432
       PG_USER: chabit
       PG_PASSWORD: chabit
