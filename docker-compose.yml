@@ -48,5 +48,25 @@ services:
       retries: 3
       start_period: 15s
 
+  seed:
+    build:
+      context: .
+      target: builder
+    command: npx tsx src/seed.ts
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_USER: chabit
+      PG_PASSWORD: chabit
+      PG_DATABASE: chabit_identity
+      JWT_SECRET: ${JWT_SECRET:-seed-secret}
+      OTP_HMAC_SECRET: ${OTP_HMAC_SECRET:-seed-secret}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-seed-secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - seed
+
 volumes:
   postgres_data:
