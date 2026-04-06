@@ -62,6 +62,10 @@ services:
       JWT_SECRET: ${JWT_SECRET:-seed-secret}
       OTP_HMAC_SECRET: ${OTP_HMAC_SECRET:-seed-secret}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET:-seed-secret}
+      WEBHOOK_BACKEND_URL: http://backend-chabit-app-1:3000/internal/webhooks/identity
+    networks:
+      - default
+      - backend_chabit
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,3 +74,8 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  backend_chabit:
+    external: true
+    name: backend-chabit_default
