@@ -3,13 +3,13 @@ services:
     image: postgres:16-alpine
     container_name: chabit-id-postgres
     environment:
-      POSTGRES_USER: chabit
-      POSTGRES_PASSWORD: chabit
-      POSTGRES_DB: chabit_identity
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chabit -d chabit_identity"]
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DATABASE}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,9 +23,9 @@ services:
       NODE_ENV: production
       PG_HOST: postgres
       PG_PORT: 5432
-      PG_USER: chabit
-      PG_PASSWORD: chabit
-      PG_DATABASE: chabit_identity
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DATABASE: ${PG_DATABASE}
       PG_POOL_MAX: 20
       PG_IDLE_TIMEOUT_MS: 30000
       PG_CONNECTION_TIMEOUT_MS: 5000
@@ -61,12 +61,12 @@ services:
     environment:
       PG_HOST: chabit-id-postgres
       PG_PORT: 5432
-      PG_USER: chabit
-      PG_PASSWORD: chabit
-      PG_DATABASE: chabit_identity
-      JWT_SECRET: ${JWT_SECRET:-seed-secret}
-      OTP_HMAC_SECRET: ${OTP_HMAC_SECRET:-seed-secret}
-      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-seed-secret}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DATABASE: ${PG_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      OTP_HMAC_SECRET: ${OTP_HMAC_SECRET}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       WEBHOOK_BACKEND_URL: http://backend-chabit-app-1:3000/internal/webhooks/identity
     networks:
       - default
