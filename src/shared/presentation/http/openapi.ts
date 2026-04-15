@@ -454,6 +454,64 @@ export const openApiSpec: object = {
       },
     },
 
+    // ── Check ──────────────────────────────────────────────────────────
+    '/check/username': {
+      get: {
+        tags: ['Check'],
+        summary: 'Check username availability',
+        description: 'Returns whether a username is available. Rate-limited to 20 requests per minute per IP.',
+        parameters: [
+          { in: 'query', name: 'value', required: true, schema: { type: 'string', minLength: 3, maxLength: 30 }, description: 'Username to check' },
+        ],
+        responses: {
+          '200': {
+            description: 'Availability result',
+            content: { 'application/json': { schema: { type: 'object', properties: { available: { type: 'boolean' } }, required: ['available'] }, example: { available: true } } },
+          },
+          '400': errorResponse('Validation error', { error: 'VALIDATION_ERROR', message: 'Invalid query param' }),
+          '429': errorResponse('Rate limited', { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' }),
+        },
+      },
+    },
+
+    '/check/email': {
+      get: {
+        tags: ['Check'],
+        summary: 'Check email availability',
+        description: 'Returns whether an email is available. Rate-limited to 20 requests per minute per IP.',
+        parameters: [
+          { in: 'query', name: 'value', required: true, schema: { type: 'string', format: 'email' }, description: 'Email to check' },
+        ],
+        responses: {
+          '200': {
+            description: 'Availability result',
+            content: { 'application/json': { schema: { type: 'object', properties: { available: { type: 'boolean' } }, required: ['available'] }, example: { available: true } } },
+          },
+          '400': errorResponse('Validation error', { error: 'VALIDATION_ERROR', message: 'Invalid query param' }),
+          '429': errorResponse('Rate limited', { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' }),
+        },
+      },
+    },
+
+    '/check/phone': {
+      get: {
+        tags: ['Check'],
+        summary: 'Check phone availability',
+        description: 'Returns whether a phone number is available. Rate-limited to 20 requests per minute per IP.',
+        parameters: [
+          { in: 'query', name: 'value', required: true, schema: { type: 'string' }, description: 'Phone number to check (e.g. +541112345678)' },
+        ],
+        responses: {
+          '200': {
+            description: 'Availability result',
+            content: { 'application/json': { schema: { type: 'object', properties: { available: { type: 'boolean' } }, required: ['available'] }, example: { available: true } } },
+          },
+          '400': errorResponse('Validation error', { error: 'VALIDATION_ERROR', message: 'Invalid query param' }),
+          '429': errorResponse('Rate limited', { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' }),
+        },
+      },
+    },
+
     '/accounts': {
       get: {
         tags: ['Accounts'],

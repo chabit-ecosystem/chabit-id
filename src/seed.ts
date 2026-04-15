@@ -161,19 +161,19 @@ async function seedUser(
   }
 
   if (user.role === 'ADMIN') {
-    // Bypass CreateAccountUseCase permission check — no existing admin to authorize the first one.
-    // Create the ADMIN account directly via the repo.
+    // Bypass CreateAccountUseCase (which requires an existing admin) for seed bootstrap.
+    // Create the ADMIN account directly via the domain entity + repo.
     const { Account } = await import('./modules/account/domain/entities/Account.entity.js');
     const { AccountId } = await import('./modules/account/domain/value-objects/AccountId.vo.js');
     const { IdentityRef: IR } = await import('./shared/domain/value-objects/IdentityRef.vo.js');
-    const existing = await accountRepo.findByIdentityRefAndType(
+    const adminAccount = Account.createAdmin(
+      AccountId.generate(),
       IR.fromPrimitive(identityRef),
-      (await import('./modules/account/domain/value-objects/AccountType.vo.js')).AccountType.admin(),
+      IR.fromPrimitive(identityRef),
     );
-    if (!existing) {
-      const adminAccount = Account.createAdmin(AccountId.generate(), IR.fromPrimitive(identityRef), IR.fromPrimitive(identityRef));
-      await accountRepo.save(adminAccount);
-    }
+    await accountRepo.save(adminAccount).catch(() => {
+      // already exists if re-running seed
+    });
   }
 
   logger.info({ email: user.email, role: user.role, identityRef }, '[seed] user created');
