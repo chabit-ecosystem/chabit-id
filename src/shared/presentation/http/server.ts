@@ -52,6 +52,7 @@ import { DeactivateAccountUseCase } from '../../../modules/account/application/u
 import { ReactivateAccountUseCase } from '../../../modules/account/application/use-cases/ReactivateAccount.usecase.js';
 import { GetAccountsByIdentityUseCase } from '../../../modules/account/application/use-cases/GetAccountsByIdentity.usecase.js';
 import { AddStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/AddStaffByOrganizer.usecase.js';
+import { RemoveStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByOrganizer.usecase.js';
 import { createAccountRoutes } from '../../../modules/account/presentation/http/account.routes.js';
 import { GetIdentityUseCase } from '../../../modules/identity/application/use-cases/GetIdentity.usecase.js';
 import { createIdentityRoutes } from '../../../modules/identity/presentation/http/identity.routes.js';
@@ -174,6 +175,7 @@ export function createApp(): Hono {
   const _reactivateAccount = new ReactivateAccountUseCase(accountRepo, accountEventRepo);
   const getAccountsByIdentity = new GetAccountsByIdentityUseCase(accountRepo);
   const addStaffByOrganizer = new AddStaffByOrganizerUseCase(accountRepo, accountEventRepo);
+  const removeStaffByOrganizer = new RemoveStaffByOrganizerUseCase(accountRepo, accountEventRepo);
   const getIdentity = new GetIdentityUseCase(identityRepo);
   const webhookSecret = process.env['WEBHOOK_SECRET'] ?? '';
   if (!webhookSecret && process.env['WEBHOOK_BACKEND_URL']) {
@@ -204,6 +206,7 @@ export function createApp(): Hono {
     reRequestOrganizer,
     getAccountsByIdentity,
     addStaffByOrganizer,
+    removeStaffByOrganizer,
     jwtSecret,
   );
   app.route('/accounts', accountRoutes);

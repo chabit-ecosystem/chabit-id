@@ -5,6 +5,7 @@ import { RejectOrganizerUseCase } from '../../application/use-cases/RejectOrgani
 import { ReRequestOrganizerUseCase } from '../../application/use-cases/ReRequestOrganizer.usecase.js';
 import { GetAccountsByIdentityUseCase } from '../../application/use-cases/GetAccountsByIdentity.usecase.js';
 import { AddStaffByOrganizerUseCase } from '../../application/use-cases/AddStaffByOrganizer.usecase.js';
+import { RemoveStaffByOrganizerUseCase } from '../../application/use-cases/RemoveStaffByOrganizer.usecase.js';
 import { createAuthMiddleware } from '../../../../shared/presentation/http/auth.middleware.js';
 
 export function createAccountRoutes(
@@ -14,6 +15,7 @@ export function createAccountRoutes(
   reRequestOrganizer: ReRequestOrganizerUseCase,
   getAccountsByIdentity: GetAccountsByIdentityUseCase,
   addStaffByOrganizer: AddStaffByOrganizerUseCase,
+  removeStaffByOrganizer: RemoveStaffByOrganizerUseCase,
   jwtSecret: string,
 ): Hono {
   const router = new Hono();
@@ -32,6 +34,14 @@ export function createAccountRoutes(
     const body = await c.req.json<{ targetRef: string }>();
     const result = await addStaffByOrganizer.execute({ callerRef, targetRef: body.targetRef });
     return c.json(result, 201);
+  });
+
+  // DELETE /accounts/staff/:accountId — el organizador saca a un staff
+  router.delete('/staff/:accountId', auth, async (c) => {
+    const callerRef = c.get('jwtPayload').sub;
+    const accountId = c.req.param('accountId');
+    await removeStaffByOrganizer.execute({ callerRef, accountId });
+    return c.json({ message: 'Staff removed' }, 200);
   });
 
   // POST /accounts/:accountId/approve

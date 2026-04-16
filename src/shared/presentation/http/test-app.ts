@@ -45,6 +45,7 @@ import { RejectOrganizerUseCase } from '../../../modules/account/application/use
 import { ReRequestOrganizerUseCase } from '../../../modules/account/application/use-cases/ReRequestOrganizer.usecase.js';
 import { GetAccountsByIdentityUseCase } from '../../../modules/account/application/use-cases/GetAccountsByIdentity.usecase.js';
 import { AddStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/AddStaffByOrganizer.usecase.js';
+import { RemoveStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByOrganizer.usecase.js';
 // Identity
 import { GetIdentityUseCase } from '../../../modules/identity/application/use-cases/GetIdentity.usecase.js';
 import { createIdentityRoutes } from '../../../modules/identity/presentation/http/identity.routes.js';
@@ -132,6 +133,7 @@ export function createTestApp(): TestApp {
   const reRequestOrganizer = new ReRequestOrganizerUseCase(accountRepo, accountEventRepo);
   const getAccountsByIdentity = new GetAccountsByIdentityUseCase(accountRepo);
   const addStaffByOrganizer = new AddStaffByOrganizerUseCase(accountRepo, accountEventRepo);
+  const removeStaffByOrganizer = new RemoveStaffByOrganizerUseCase(accountRepo, accountEventRepo);
   const getIdentity = new GetIdentityUseCase(identityRepo);
   const webhookSender = new StubWebhookSender();
 
@@ -154,7 +156,7 @@ export function createTestApp(): TestApp {
 
   app.route(
     '/accounts',
-    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, addStaffByOrganizer, 'test-secret'),
+    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, addStaffByOrganizer, removeStaffByOrganizer, 'test-secret'),
   );
 
   app.route('/identities', createIdentityRoutes(getIdentity));
