@@ -5,7 +5,6 @@ import { RejectOrganizerUseCase } from '../../application/use-cases/RejectOrgani
 import { ReRequestOrganizerUseCase } from '../../application/use-cases/ReRequestOrganizer.usecase.js';
 import { GetAccountsByIdentityUseCase } from '../../application/use-cases/GetAccountsByIdentity.usecase.js';
 import { AddStaffByOrganizerUseCase } from '../../application/use-cases/AddStaffByOrganizer.usecase.js';
-import { ReRequestStaffUseCase } from '../../application/use-cases/ReRequestStaff.usecase.js';
 import { createAuthMiddleware } from '../../../../shared/presentation/http/auth.middleware.js';
 
 export function createAccountRoutes(
@@ -15,7 +14,6 @@ export function createAccountRoutes(
   reRequestOrganizer: ReRequestOrganizerUseCase,
   getAccountsByIdentity: GetAccountsByIdentityUseCase,
   addStaffByOrganizer: AddStaffByOrganizerUseCase,
-  reRequestStaff: ReRequestStaffUseCase,
   jwtSecret: string,
 ): Hono {
   const router = new Hono();
@@ -56,13 +54,6 @@ export function createAccountRoutes(
   router.post('/organizer-re-request', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
     await reRequestOrganizer.execute({ callerRef });
-    return c.json({ message: 'Re-requested' }, 200);
-  });
-
-  // POST /accounts/staff-re-request
-  router.post('/staff-re-request', auth, async (c) => {
-    const callerRef = c.get('jwtPayload').sub;
-    await reRequestStaff.execute({ callerRef });
     return c.json({ message: 'Re-requested' }, 200);
   });
 
