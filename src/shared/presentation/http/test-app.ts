@@ -44,10 +44,12 @@ import { ApproveOrganizerUseCase } from '../../../modules/account/application/us
 import { RejectOrganizerUseCase } from '../../../modules/account/application/use-cases/RejectOrganizer.usecase.js';
 import { ReRequestOrganizerUseCase } from '../../../modules/account/application/use-cases/ReRequestOrganizer.usecase.js';
 import { GetAccountsByIdentityUseCase } from '../../../modules/account/application/use-cases/GetAccountsByIdentity.usecase.js';
-import { RequestStaffUseCase } from '../../../modules/account/application/use-cases/RequestStaff.usecase.js';
-import { ReRequestStaffUseCase } from '../../../modules/account/application/use-cases/ReRequestStaff.usecase.js';
+import { AddStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/AddStaffByOrganizer.usecase.js';
+import { RemoveStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByOrganizer.usecase.js';
+import { RemoveStaffByIdentityRefUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByIdentityRef.usecase.js';
 // Identity
 import { GetIdentityUseCase } from '../../../modules/identity/application/use-cases/GetIdentity.usecase.js';
+import { GetIdentityByEmailUseCase } from '../../../modules/identity/application/use-cases/GetIdentityByEmail.usecase.js';
 import { createIdentityRoutes } from '../../../modules/identity/presentation/http/identity.routes.js';
 // Webhook stub
 import type { WebhookSender } from '../../infrastructure/http/WebhookSender.port.js';
@@ -132,9 +134,11 @@ export function createTestApp(): TestApp {
   const rejectOrganizer = new RejectOrganizerUseCase(accountRepo, accountEventRepo);
   const reRequestOrganizer = new ReRequestOrganizerUseCase(accountRepo, accountEventRepo);
   const getAccountsByIdentity = new GetAccountsByIdentityUseCase(accountRepo);
-  const requestStaff = new RequestStaffUseCase(accountRepo, accountEventRepo);
-  const reRequestStaff = new ReRequestStaffUseCase(accountRepo, accountEventRepo);
+  const addStaffByOrganizer = new AddStaffByOrganizerUseCase(accountRepo, accountEventRepo);
+  const removeStaffByOrganizer = new RemoveStaffByOrganizerUseCase(accountRepo, accountEventRepo);
+  const removeStaffByIdentityRef = new RemoveStaffByIdentityRefUseCase(accountRepo, accountEventRepo);
   const getIdentity = new GetIdentityUseCase(identityRepo);
+  const getIdentityByEmail = new GetIdentityByEmailUseCase(identityRepo);
   const webhookSender = new StubWebhookSender();
 
   // ── Routes ────────────────────────────────────────────────────────
@@ -156,10 +160,10 @@ export function createTestApp(): TestApp {
 
   app.route(
     '/accounts',
-    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, requestStaff, reRequestStaff),
+    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, addStaffByOrganizer, removeStaffByOrganizer, removeStaffByIdentityRef, 'test-secret'),
   );
 
-  app.route('/identities', createIdentityRoutes(getIdentity));
+  app.route('/identities', createIdentityRoutes(getIdentity, getIdentityByEmail, 'test-secret'));
 
   app.route('/check', createCheckRoutes(identityRepo, credentialRepo));
 
