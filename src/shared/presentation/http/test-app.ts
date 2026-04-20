@@ -47,11 +47,11 @@ import { GetAccountsByIdentityUseCase } from '../../../modules/account/applicati
 import { AddStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/AddStaffByOrganizer.usecase.js';
 import { RemoveStaffByOrganizerUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByOrganizer.usecase.js';
 import { RemoveStaffByIdentityRefUseCase } from '../../../modules/account/application/use-cases/RemoveStaffByIdentityRef.usecase.js';
-import { RequestComercioUseCase } from '../../../modules/account/application/use-cases/RequestComercio.usecase.js';
-import { ReRequestComercioUseCase } from '../../../modules/account/application/use-cases/ReRequestComercio.usecase.js';
-import { AddEmpleadoByComercioUseCase } from '../../../modules/account/application/use-cases/AddEmpleadoByComercio.usecase.js';
-import { RemoveEmpleadoByComercioUseCase } from '../../../modules/account/application/use-cases/RemoveEmpleadoByComercio.usecase.js';
-import { RemoveEmpleadoByIdentityRefUseCase } from '../../../modules/account/application/use-cases/RemoveEmpleadoByIdentityRef.usecase.js';
+import { RequestCommerceUseCase } from '../../../modules/account/application/use-cases/RequestCommerce.usecase.js';
+import { ReRequestCommerceUseCase } from '../../../modules/account/application/use-cases/ReRequestCommerce.usecase.js';
+import { AddEmployeeByCommerceUseCase } from '../../../modules/account/application/use-cases/AddEmployeeByCommerce.usecase.js';
+import { RemoveEmployeeByCommerceUseCase } from '../../../modules/account/application/use-cases/RemoveEmployeeByCommerce.usecase.js';
+import { RemoveEmployeeByIdentityRefUseCase } from '../../../modules/account/application/use-cases/RemoveEmployeeByIdentityRef.usecase.js';
 // Identity
 import { GetIdentityUseCase } from '../../../modules/identity/application/use-cases/GetIdentity.usecase.js';
 import { GetIdentityByEmailUseCase } from '../../../modules/identity/application/use-cases/GetIdentityByEmail.usecase.js';
@@ -142,11 +142,11 @@ export function createTestApp(): TestApp {
   const addStaffByOrganizer = new AddStaffByOrganizerUseCase(accountRepo, accountEventRepo);
   const removeStaffByOrganizer = new RemoveStaffByOrganizerUseCase(accountRepo, accountEventRepo);
   const removeStaffByIdentityRef = new RemoveStaffByIdentityRefUseCase(accountRepo, accountEventRepo);
-  const requestComercio = new RequestComercioUseCase(accountRepo, accountEventRepo);
-  const reRequestComercio = new ReRequestComercioUseCase(accountRepo, accountEventRepo);
-  const addEmpleadoByComercio = new AddEmpleadoByComercioUseCase(accountRepo, accountEventRepo);
-  const removeEmpleadoByComercio = new RemoveEmpleadoByComercioUseCase(accountRepo, accountEventRepo);
-  const removeEmpleadoByIdentityRef = new RemoveEmpleadoByIdentityRefUseCase(accountRepo, accountEventRepo);
+  const requestCommerce = new RequestCommerceUseCase(accountRepo, accountEventRepo);
+  const reRequestCommerce = new ReRequestCommerceUseCase(accountRepo, accountEventRepo);
+  const addEmployeeByCommerce = new AddEmployeeByCommerceUseCase(accountRepo, accountEventRepo);
+  const removeEmployeeByCommerce = new RemoveEmployeeByCommerceUseCase(accountRepo, accountEventRepo);
+  const removeEmployeeByIdentityRef = new RemoveEmployeeByIdentityRefUseCase(accountRepo, accountEventRepo);
   const getIdentity = new GetIdentityUseCase(identityRepo);
   const getIdentityByEmail = new GetIdentityByEmailUseCase(identityRepo);
   const webhookSender = new StubWebhookSender();
@@ -170,7 +170,7 @@ export function createTestApp(): TestApp {
 
   app.route(
     '/accounts',
-    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, addStaffByOrganizer, removeStaffByOrganizer, removeStaffByIdentityRef, requestComercio, reRequestComercio, addEmpleadoByComercio, removeEmpleadoByComercio, removeEmpleadoByIdentityRef, 'test-secret'),
+    createAccountRoutes(requestOrganizer, approveOrganizer, rejectOrganizer, reRequestOrganizer, getAccountsByIdentity, addStaffByOrganizer, removeStaffByOrganizer, removeStaffByIdentityRef, requestCommerce, reRequestCommerce, addEmployeeByCommerce, removeEmployeeByCommerce, removeEmployeeByIdentityRef, 'test-secret'),
   );
 
   app.route('/identities', createIdentityRoutes(getIdentity, getIdentityByEmail, 'test-secret'));
