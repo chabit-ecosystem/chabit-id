@@ -24,7 +24,15 @@ export const openApiSpec: object = {
     description: 'Identity, authentication and account management service',
   },
   servers: [{ url: 'http://localhost:3001', description: 'Local development' }],
+  security: [{ bearerAuth: [] }],
   components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
     schemas: {
       Error: errorSchema,
       TokenPair: {
