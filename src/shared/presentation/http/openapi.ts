@@ -454,6 +454,34 @@ export const openApiSpec: object = {
       },
     },
 
+    '/accounts/commerce-request': {
+      post: {
+        tags: ['Accounts'],
+        summary: 'Request commerce role',
+        description: 'Creates a COMMERCE account for the caller.',
+        responses: {
+          '201': {
+            description: 'Commerce request submitted',
+            content: { 'application/json': { schema: { type: 'object', properties: { accountId: { type: 'string', format: 'uuid' } }, required: ['accountId'] } } },
+          },
+          '409': errorResponse('Account already exists', { error: 'ACCOUNT_ALREADY_EXISTS', message: 'A commerce account already exists for this identity' }),
+        },
+      },
+    },
+
+    '/accounts/commerce-re-request': {
+      post: {
+        tags: ['Accounts'],
+        summary: 'Re-request commerce role',
+        description: 'Re-submits a commerce request after a rejection.',
+        responses: {
+          '200': { description: 'Re-request submitted', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' } } }, example: { message: 'Re-requested' } } } },
+          '404': errorResponse('Account not found', { error: 'ACCOUNT_NOT_FOUND', message: 'No commerce account found for this identity' }),
+          '422': errorResponse('Invalid status transition', { error: 'INVALID_STATUS_TRANSITION', message: 'Account is not in REJECTED status' }),
+        },
+      },
+    },
+
     // ── Check ──────────────────────────────────────────────────────────
     '/check/username': {
       get: {
