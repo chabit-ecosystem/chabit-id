@@ -7,11 +7,11 @@ import { GetAccountsByIdentityUseCase } from '../../application/use-cases/GetAcc
 import { AddStaffByOrganizerUseCase } from '../../application/use-cases/AddStaffByOrganizer.usecase.js';
 import { RemoveStaffByOrganizerUseCase } from '../../application/use-cases/RemoveStaffByOrganizer.usecase.js';
 import { RemoveStaffByIdentityRefUseCase } from '../../application/use-cases/RemoveStaffByIdentityRef.usecase.js';
-import { RequestComercioUseCase } from '../../application/use-cases/RequestComercio.usecase.js';
-import { ReRequestComercioUseCase } from '../../application/use-cases/ReRequestComercio.usecase.js';
-import { AddEmpleadoByComercioUseCase } from '../../application/use-cases/AddEmpleadoByComercio.usecase.js';
-import { RemoveEmpleadoByComercioUseCase } from '../../application/use-cases/RemoveEmpleadoByComercio.usecase.js';
-import { RemoveEmpleadoByIdentityRefUseCase } from '../../application/use-cases/RemoveEmpleadoByIdentityRef.usecase.js';
+import { RequestCommerceUseCase } from '../../application/use-cases/RequestCommerce.usecase.js';
+import { ReRequestCommerceUseCase } from '../../application/use-cases/ReRequestCommerce.usecase.js';
+import { AddEmployeeByCommerceUseCase } from '../../application/use-cases/AddEmployeeByCommerce.usecase.js';
+import { RemoveEmployeeByCommerceUseCase } from '../../application/use-cases/RemoveEmployeeByCommerce.usecase.js';
+import { RemoveEmployeeByIdentityRefUseCase } from '../../application/use-cases/RemoveEmployeeByIdentityRef.usecase.js';
 import { createAuthMiddleware } from '../../../../shared/presentation/http/auth.middleware.js';
 
 export function createAccountRoutes(
@@ -23,11 +23,11 @@ export function createAccountRoutes(
   addStaffByOrganizer: AddStaffByOrganizerUseCase,
   removeStaffByOrganizer: RemoveStaffByOrganizerUseCase,
   removeStaffByIdentityRef: RemoveStaffByIdentityRefUseCase,
-  requestComercio: RequestComercioUseCase,
-  reRequestComercio: ReRequestComercioUseCase,
-  addEmpleadoByComercio: AddEmpleadoByComercioUseCase,
-  removeEmpleadoByComercio: RemoveEmpleadoByComercioUseCase,
-  removeEmpleadoByIdentityRef: RemoveEmpleadoByIdentityRefUseCase,
+  requestCommerce: RequestCommerceUseCase,
+  reRequestCommerce: ReRequestCommerceUseCase,
+  addEmployeeByCommerce: AddEmployeeByCommerceUseCase,
+  removeEmployeeByCommerce: RemoveEmployeeByCommerceUseCase,
+  removeEmployeeByIdentityRef: RemoveEmployeeByIdentityRefUseCase,
   jwtSecret: string,
 ): Hono {
   const router = new Hono();
@@ -87,42 +87,42 @@ export function createAccountRoutes(
     return c.json({ message: 'Re-requested' }, 200);
   });
 
-  // POST /accounts/comercio-request
-  router.post('/comercio-request', auth, async (c) => {
+  // POST /accounts/commerce-request
+  router.post('/commerce-request', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
-    const result = await requestComercio.execute({ callerRef });
+    const result = await requestCommerce.execute({ callerRef });
     return c.json(result, 201);
   });
 
-  // POST /accounts/comercio-re-request
-  router.post('/comercio-re-request', auth, async (c) => {
+  // POST /accounts/commerce-re-request
+  router.post('/commerce-re-request', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
-    await reRequestComercio.execute({ callerRef });
+    await reRequestCommerce.execute({ callerRef });
     return c.json({ message: 'Re-requested' }, 200);
   });
 
-  // POST /accounts/empleado-add  — el comercio agrega a alguien como empleado
-  router.post('/empleado-add', auth, async (c) => {
+  // POST /accounts/employee-add — commerce adds someone as employee
+  router.post('/employee-add', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
     const body = await c.req.json<{ targetRef: string }>();
-    const result = await addEmpleadoByComercio.execute({ callerRef, targetRef: body.targetRef });
+    const result = await addEmployeeByCommerce.execute({ callerRef, targetRef: body.targetRef });
     return c.json(result, 201);
   });
 
-  // DELETE /accounts/empleado/:accountId — el comercio saca a un empleado por accountId
-  router.delete('/empleado/:accountId', auth, async (c) => {
+  // DELETE /accounts/employee/:accountId — commerce removes an employee by accountId
+  router.delete('/employee/:accountId', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
     const accountId = c.req.param('accountId');
-    await removeEmpleadoByComercio.execute({ callerRef, accountId });
-    return c.json({ message: 'Empleado removed' }, 200);
+    await removeEmployeeByCommerce.execute({ callerRef, accountId });
+    return c.json({ message: 'Employee removed' }, 200);
   });
 
-  // DELETE /accounts/empleado-by-identity/:targetRef — el comercio saca a un empleado por identityRef
-  router.delete('/empleado-by-identity/:targetRef', auth, async (c) => {
+  // DELETE /accounts/employee-by-identity/:targetRef — commerce removes an employee by identityRef
+  router.delete('/employee-by-identity/:targetRef', auth, async (c) => {
     const callerRef = c.get('jwtPayload').sub;
     const targetRef = c.req.param('targetRef');
-    await removeEmpleadoByIdentityRef.execute({ callerRef, targetRef });
-    return c.json({ message: 'Empleado removed' }, 200);
+    await removeEmployeeByIdentityRef.execute({ callerRef, targetRef });
+    return c.json({ message: 'Employee removed' }, 200);
   });
 
   // GET /accounts?identityId=xxx

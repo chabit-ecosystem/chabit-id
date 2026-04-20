@@ -176,62 +176,62 @@ describe('Account entity', () => {
     });
   });
 
-  describe('createComercio()', () => {
-    it('starts with type COMERCIO and status PENDING', () => {
-      const a = Account.createComercio(makeId(), makeRef());
-      expect(a.getType().toPrimitive()).toBe('COMERCIO');
+  describe('createCommerce()', () => {
+    it('starts with type COMMERCE and status PENDING', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
+      expect(a.getType().toPrimitive()).toBe('COMMERCE');
       expect(a.getStatus().toPrimitive()).toBe('PENDING');
       expect(a.getCreatedBy()).toBeUndefined();
     });
   });
 
-  describe('createEmpleadoByComercio()', () => {
-    it('starts with type EMPLEADO, status ACTIVE, and createdBy set', () => {
-      const a = Account.createEmpleadoByComercio(makeId(), makeRef(), makeRef2());
-      expect(a.getType().toPrimitive()).toBe('EMPLEADO');
+  describe('createEmployeeByCommerce()', () => {
+    it('starts with type EMPLOYEE, status ACTIVE, and createdBy set', () => {
+      const a = Account.createEmployeeByCommerce(makeId(), makeRef(), makeRef2());
+      expect(a.getType().toPrimitive()).toBe('EMPLOYEE');
       expect(a.getStatus().toPrimitive()).toBe('ACTIVE');
       expect(a.getCreatedBy()?.toPrimitive()).toBe(makeRef2().toPrimitive());
     });
   });
 
-  describe('approve() — COMERCIO', () => {
-    it('transitions PENDING COMERCIO to ACTIVE', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+  describe('approve() — COMMERCE', () => {
+    it('transitions PENDING COMMERCE to ACTIVE', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       a.approve();
       expect(a.getStatus().toPrimitive()).toBe('ACTIVE');
     });
 
-    it('throws on already ACTIVE comercio', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+    it('throws on already ACTIVE commerce', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       a.approve();
       expect(() => a.approve()).toThrow(InvalidStatusTransitionError);
     });
   });
 
-  describe('reject() — COMERCIO', () => {
-    it('transitions PENDING COMERCIO to REJECTED', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+  describe('reject() — COMMERCE', () => {
+    it('transitions PENDING COMMERCE to REJECTED', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       a.reject();
       expect(a.getStatus().toPrimitive()).toBe('REJECTED');
     });
 
-    it('throws on already ACTIVE comercio', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+    it('throws on already ACTIVE commerce', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       a.approve();
       expect(() => a.reject()).toThrow(InvalidStatusTransitionError);
     });
   });
 
-  describe('reRequest() — COMERCIO', () => {
-    it('transitions REJECTED COMERCIO back to PENDING', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+  describe('reRequest() — COMMERCE', () => {
+    it('transitions REJECTED COMMERCE back to PENDING', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       a.reject();
       a.reRequest();
       expect(a.getStatus().toPrimitive()).toBe('PENDING');
     });
 
-    it('throws if COMERCIO is PENDING (not REJECTED)', () => {
-      const a = Account.createComercio(makeId(), makeRef());
+    it('throws if COMMERCE is PENDING (not REJECTED)', () => {
+      const a = Account.createCommerce(makeId(), makeRef());
       expect(() => a.reRequest()).toThrow(InvalidStatusTransitionError);
     });
   });

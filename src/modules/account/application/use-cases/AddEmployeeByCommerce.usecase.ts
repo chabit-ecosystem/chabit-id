@@ -7,35 +7,35 @@ import { IdentityRef } from '../../../../shared/domain/value-objects/IdentityRef
 import { AccountAlreadyExistsError, InsufficientPermissionsError } from '../../domain/errors/Account.errors.js';
 import { logger } from '../../../../shared/infrastructure/logger.js';
 
-export interface AddEmpleadoByComercioDto {
-  callerRef: string;  // comercio — viene del JWT
-  targetRef: string;  // empleado — viene del body
+export interface AddEmployeeByCommerceDto {
+  callerRef: string;
+  targetRef: string;
 }
 
-export class AddEmpleadoByComercioUseCase {
+export class AddEmployeeByCommerceUseCase {
   constructor(
     private readonly repo: AccountRepository,
     private readonly eventRepo: AccountEventRepository,
   ) {}
 
-  async execute(dto: AddEmpleadoByComercioDto): Promise<{ accountId: string }> {
+  async execute(dto: AddEmployeeByCommerceDto): Promise<{ accountId: string }> {
     const callerRef = IdentityRef.fromPrimitive(dto.callerRef);
     const targetRef = IdentityRef.fromPrimitive(dto.targetRef);
 
-    const callerComercio = await this.repo.findByIdentityRefAndType(callerRef, AccountType.comercio());
-    if (!callerComercio || !callerComercio.getStatus().isActive()) {
+    const callerCommerce = await this.repo.findByIdentityRefAndType(callerRef, AccountType.commerce());
+    if (!callerCommerce || !callerCommerce.getStatus().isActive()) {
       throw new InsufficientPermissionsError();
     }
 
-    const existing = await this.repo.findByIdentityRefAndType(targetRef, AccountType.empleado());
-    if (existing) throw new AccountAlreadyExistsError('EMPLEADO');
+    const existing = await this.repo.findByIdentityRefAndType(targetRef, AccountType.employee());
+    if (existing) throw new AccountAlreadyExistsError('EMPLOYEE');
 
     const id = AccountId.generate();
-    const account = Account.createEmpleadoByComercio(id, targetRef, callerRef);
+    const account = Account.createEmployeeByCommerce(id, targetRef, callerRef);
     await this.repo.save(account);
 
     this.eventRepo.save({ accountId: id, type: 'created', performedBy: callerRef })
-      .catch(err => logger.warn({ err }, '[AddEmpleadoByComercio] event error'));
+      .catch(err => logger.warn({ err }, '[AddEmployeeByCommerce] event error'));
 
     return { accountId: id.toPrimitive() };
   }

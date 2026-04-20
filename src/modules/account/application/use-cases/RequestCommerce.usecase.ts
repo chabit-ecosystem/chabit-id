@@ -7,29 +7,29 @@ import { AccountType } from '../../domain/value-objects/AccountType.vo.js';
 import { IdentityRef } from '../../../../shared/domain/value-objects/IdentityRef.vo.js';
 import { AccountAlreadyExistsError, AccountNotFoundError, InsufficientPermissionsError } from '../../domain/errors/Account.errors.js';
 
-export interface RequestComercioDto { callerRef: string; }
+export interface RequestCommerceDto { callerRef: string; }
 
-export class RequestComercioUseCase {
+export class RequestCommerceUseCase {
   constructor(
     private readonly repo: AccountRepository,
     private readonly eventRepo: AccountEventRepository,
   ) {}
 
-  async execute(dto: RequestComercioDto): Promise<{ accountId: string }> {
+  async execute(dto: RequestCommerceDto): Promise<{ accountId: string }> {
     const callerRef = IdentityRef.fromPrimitive(dto.callerRef);
 
-    const existing = await this.repo.findByIdentityRefAndType(callerRef, AccountType.comercio());
-    if (existing) throw new AccountAlreadyExistsError('COMERCIO');
+    const existing = await this.repo.findByIdentityRefAndType(callerRef, AccountType.commerce());
+    if (existing) throw new AccountAlreadyExistsError('COMMERCE');
 
     const userAccount = await this.repo.findByIdentityRefAndType(callerRef, AccountType.user());
     if (!userAccount) throw new AccountNotFoundError();
     if (!userAccount.getStatus().isActive()) throw new InsufficientPermissionsError();
 
     const id = AccountId.generate();
-    const account = Account.createComercio(id, callerRef);
+    const account = Account.createCommerce(id, callerRef);
     await this.repo.save(account);
     this.eventRepo.save({ accountId: id, type: 'created', performedBy: callerRef })
-      .catch(err => logger.warn({ err }, '[RequestComercio] event error'));
+      .catch(err => logger.warn({ err }, '[RequestCommerce] event error'));
     return { accountId: id.toPrimitive() };
   }
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { RequestComercioUseCase } from './RequestComercio.usecase.js';
+import { RequestCommerceUseCase } from './RequestCommerce.usecase.js';
 import { CreateAccountUseCase } from './CreateAccount.usecase.js';
 import { InMemoryAccountRepository } from '../../infrastructure/persistence/InMemoryAccountRepository.js';
 import { InMemoryAccountEventRepository } from '../../infrastructure/persistence/InMemoryAccountEventRepository.js';
@@ -7,20 +7,20 @@ import { AccountAlreadyExistsError, AccountNotFoundError, InsufficientPermission
 
 const CALLER_REF = '00000000-0000-4000-8000-000000000001';
 
-describe('RequestComercioUseCase', () => {
+describe('RequestCommerceUseCase', () => {
   let repo: InMemoryAccountRepository;
   let eventRepo: InMemoryAccountEventRepository;
-  let useCase: RequestComercioUseCase;
+  let useCase: RequestCommerceUseCase;
   let createAccount: CreateAccountUseCase;
 
   beforeEach(() => {
     repo = new InMemoryAccountRepository();
     eventRepo = new InMemoryAccountEventRepository();
-    useCase = new RequestComercioUseCase(repo, eventRepo);
+    useCase = new RequestCommerceUseCase(repo, eventRepo);
     createAccount = new CreateAccountUseCase(repo, eventRepo);
   });
 
-  it('creates COMERCIO account for an ACTIVE USER', async () => {
+  it('creates COMMERCE account for an ACTIVE USER', async () => {
     await createAccount.execute({ identityRef: CALLER_REF, type: 'USER' });
     const result = await useCase.execute({ callerRef: CALLER_REF });
     expect(result.accountId).toBeTruthy();
@@ -30,7 +30,7 @@ describe('RequestComercioUseCase', () => {
     await expect(useCase.execute({ callerRef: CALLER_REF })).rejects.toThrow(AccountNotFoundError);
   });
 
-  it('throws AccountAlreadyExistsError when COMERCIO already exists', async () => {
+  it('throws AccountAlreadyExistsError when COMMERCE already exists', async () => {
     await createAccount.execute({ identityRef: CALLER_REF, type: 'USER' });
     await useCase.execute({ callerRef: CALLER_REF });
     await expect(useCase.execute({ callerRef: CALLER_REF })).rejects.toThrow(AccountAlreadyExistsError);
