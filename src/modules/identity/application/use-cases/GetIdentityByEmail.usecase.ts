@@ -3,7 +3,7 @@ import { Email, InvalidEmailError } from '../../../../shared/domain/value-object
 import { IdentityNotFoundError } from '../../domain/errors/Identity.errors.js';
 
 export interface GetIdentityByEmailDto { email: string; }
-export interface GetIdentityByEmailResult { identityRef: string; fullName: string; }
+export interface GetIdentityByEmailResult { identityRef: string; fullName: string | undefined; }
 
 export class GetIdentityByEmailUseCase {
   constructor(private readonly repo: IdentityRepository) {}

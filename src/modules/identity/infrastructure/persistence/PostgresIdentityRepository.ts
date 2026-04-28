@@ -58,11 +58,11 @@ export class PostgresIdentityRepository implements IdentityRepository {
   private toEntity(row: Record<string, unknown>): Identity {
     return Identity.fromPrimitive({
       id: row['id'] as string,
-      fullName: row['full_name'] as string,
+      fullName: (row['full_name'] as string | null) ?? undefined,
       email: row['email'] as string,
-      phone: row['phone'] as string,
-      nationality: row['nationality'] as string,
-      country: row['country'] as string,
+      phone: (row['phone'] as string | null) ?? undefined,
+      nationality: (row['nationality'] as string | null) ?? undefined,
+      country: (row['country'] as string | null) ?? undefined,
       blnkIdentityRef: (row['blnk_identity_id'] as string | null) ?? undefined,
       emailVerifiedAt: row['email_verified_at'] as Date,
       createdAt: row['created_at'] as Date,

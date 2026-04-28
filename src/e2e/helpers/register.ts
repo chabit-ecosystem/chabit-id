@@ -13,15 +13,12 @@ export interface RegisteredUser {
   identityRef: string;
   sessionId: string;
   email: string;
-  username: string;
   password: string;
 }
 
 export interface RegisterOptions {
   email?: string;
-  username?: string;
   password?: string;
-  phone?: string;
 }
 
 export async function registerTestUser(
@@ -30,9 +27,7 @@ export async function registerTestUser(
   overrides: RegisterOptions = {},
 ): Promise<RegisteredUser> {
   const email = overrides.email ?? 'testuser@example.com';
-  const username = overrides.username ?? 'testuser';
   const password = overrides.password ?? 'password123';
-  const phone = overrides.phone ?? '1234567890';
 
   // 1. Request email verification
   const vRes = await app.request('/verification/email', {
@@ -56,16 +51,7 @@ export async function registerTestUser(
   const rRes = await app.request('/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      verificationId,
-      fullName: 'Test User',
-      email,
-      phone,
-      nationality: 'Argentine',
-      country: 'Argentina',
-      username,
-      password,
-    }),
+    body: JSON.stringify({ verificationId, email, password }),
   });
   const { accessToken, updateToken } = (await rRes.json()) as { accessToken: string; updateToken: string };
 
@@ -73,5 +59,5 @@ export async function registerTestUser(
   const identityRef = payload['sub'] as string;
   const sessionId = payload['sid'] as string;
 
-  return { accessToken, updateToken, identityRef, sessionId, email, username, password };
+  return { accessToken, updateToken, identityRef, sessionId, email, password };
 }

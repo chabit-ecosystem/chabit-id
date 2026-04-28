@@ -9,12 +9,12 @@ import { PhoneNumber } from '../../../../shared/domain/value-objects/PhoneNumber
 import { EmailAlreadyRegisteredError, PhoneAlreadyRegisteredError } from '../../domain/errors/Identity.errors.js';
 
 export interface CreateIdentityDto {
-  fullName: string;
   email: string;
-  phone: string;
-  nationality: string;
-  country: string;
   emailVerifiedAt: Date;
+  fullName?: string;
+  phone?: string;
+  nationality?: string;
+  country?: string;
 }
 
 export interface CreateIdentityResult {
@@ -26,21 +26,24 @@ export class CreateIdentityUseCase {
 
   async execute(dto: CreateIdentityDto): Promise<CreateIdentityResult> {
     const email = Email.fromPrimitive(dto.email);
-    const phone = PhoneNumber.fromPrimitive(dto.phone);
 
     const existing = await this.repo.findByEmail(email);
     if (existing) throw new EmailAlreadyRegisteredError(email.toPrimitive());
 
-    const existingPhone = await this.repo.findByPhone(phone);
-    if (existingPhone) throw new PhoneAlreadyRegisteredError(phone.toPrimitive());
+    let phone: PhoneNumber | undefined;
+    if (dto.phone) {
+      phone = PhoneNumber.fromPrimitive(dto.phone);
+      const existingPhone = await this.repo.findByPhone(phone);
+      if (existingPhone) throw new PhoneAlreadyRegisteredError(phone.toPrimitive());
+    }
 
     const identity = Identity.create({
       id: IdentityId.generate(),
-      fullName: FullName.fromPrimitive(dto.fullName),
+      fullName: dto.fullName ? FullName.fromPrimitive(dto.fullName) : undefined,
       email,
       phone,
-      nationality: Nationality.fromPrimitive(dto.nationality),
-      country: Country.fromPrimitive(dto.country),
+      nationality: dto.nationality ? Nationality.fromPrimitive(dto.nationality) : undefined,
+      country: dto.country ? Country.fromPrimitive(dto.country) : undefined,
       emailVerifiedAt: dto.emailVerifiedAt,
     });
 

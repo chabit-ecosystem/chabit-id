@@ -24,7 +24,8 @@ export class InMemoryIdentityRepository implements IdentityRepository {
 
   async findByPhone(phone: PhoneNumber): Promise<Identity | null> {
     for (const identity of this.store.values()) {
-      if (identity.getPhone().toPrimitive() === phone.toPrimitive()) return identity;
+      const p = identity.getPhone();
+      if (p && p.toPrimitive() === phone.toPrimitive()) return identity;
     }
     return null;
   }

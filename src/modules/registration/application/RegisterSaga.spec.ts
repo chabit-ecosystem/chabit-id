@@ -119,12 +119,7 @@ function buildSaga() {
 
 const BASE_INPUT = {
   verificationId: 1,
-  fullName: 'John Doe',
   email: 'john@example.com',
-  phone: '+1234567890',
-  nationality: 'American',
-  country: 'USA',
-  username: 'johndoe',
   password: 'password123',
 };
 
@@ -186,54 +181,6 @@ describe('RegisterSaga', () => {
     });
   });
 
-  describe('Step 2 compensation: CreateCredential fails → identity is hard deleted', () => {
-    it('compensates identity when username is already taken', async () => {
-      const { saga, verificationRepo, identityRepo, credentialRepo } = buildSaga();
-
-      // Pre-register a credential with the same username (but different identity)
-      const existingCredential = await import('../../credential/domain/entities/Credential.entity.js');
-      const existingUsername = await import('../../credential/domain/value-objects/Username.vo.js');
-      const existingPasswordHash = await import('../../credential/domain/value-objects/PasswordHash.vo.js');
-      const existingIdentityRef = await import('../../../shared/domain/value-objects/IdentityRef.vo.js');
-
-      const takenCredential = existingCredential.Credential.create({
-        id: CredentialId.generate(),
-        identityRef: existingIdentityRef.IdentityRef.fromPrimitive(randomUUID()),
-        username: existingUsername.Username.fromPrimitive('johndoe'),
-        passwordHash: existingPasswordHash.PasswordHash.fromPrimitive('hashed:somepassword'),
-      });
-      await credentialRepo.save(takenCredential);
-
-      // Save a USED verification
-      const verification = makeUsedVerification(1, 'john@example.com');
-      await verificationRepo.save(verification);
-
-      await expect(saga.execute(BASE_INPUT)).rejects.toThrow();
-
-      // Identity should be compensated (hard deleted)
-      const identities = await identityRepo.findByEmail(
-        (await import('../../../shared/domain/value-objects/Email.vo.js')).Email.fromPrimitive('john@example.com')
-      );
-      expect(identities).toBeNull();
-    });
-
-    it('compensates identity when username is reserved', async () => {
-      const { saga, verificationRepo, identityRepo } = buildSaga();
-
-      const verification = makeUsedVerification(1, 'john@example.com');
-      await verificationRepo.save(verification);
-
-      // 'register' is a reserved username
-      const inputWithReservedUsername = { ...BASE_INPUT, username: 'register' };
-
-      await expect(saga.execute(inputWithReservedUsername)).rejects.toThrow();
-
-      const identities = await identityRepo.findByEmail(
-        (await import('../../../shared/domain/value-objects/Email.vo.js')).Email.fromPrimitive('john@example.com')
-      );
-      expect(identities).toBeNull();
-    });
-  });
 
   describe('Step 3 compensation: CreateAccount fails → credential and identity are hard deleted', () => {
     it('compensates credential and identity when account already exists', async () => {

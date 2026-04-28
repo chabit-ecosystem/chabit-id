@@ -9,11 +9,11 @@ import { BlnkRefAlreadyAssignedError, EmailNotVerifiedError } from '../errors/Id
 
 export interface IdentityPrimitives {
   id: string;
-  fullName: string;
+  fullName: string | undefined;
   email: string;
-  phone: string;
-  nationality: string;
-  country: string;
+  phone: string | undefined;
+  nationality: string | undefined;
+  country: string | undefined;
   blnkIdentityRef: string | undefined;
   emailVerifiedAt: Date;
   createdAt: Date;
@@ -22,11 +22,11 @@ export interface IdentityPrimitives {
 
 export class Identity {
   private readonly id: IdentityId;
-  private fullName: FullName;
+  private fullName: FullName | undefined;
   private readonly email: Email;
-  private phone: PhoneNumber;
-  private nationality: Nationality;
-  private country: Country;
+  private phone: PhoneNumber | undefined;
+  private nationality: Nationality | undefined;
+  private country: Country | undefined;
   private blnkIdentityRef: BlnkIdentityRef | undefined;
   private readonly emailVerifiedAt: Date;
   private readonly createdAt: Date;
@@ -34,11 +34,11 @@ export class Identity {
 
   private constructor(props: {
     id: IdentityId;
-    fullName: FullName;
+    fullName: FullName | undefined;
     email: Email;
-    phone: PhoneNumber;
-    nationality: Nationality;
-    country: Country;
+    phone: PhoneNumber | undefined;
+    nationality: Nationality | undefined;
+    country: Country | undefined;
     blnkIdentityRef: BlnkIdentityRef | undefined;
     emailVerifiedAt: Date;
     createdAt: Date;
@@ -58,17 +58,23 @@ export class Identity {
 
   static create(props: {
     id: IdentityId;
-    fullName: FullName;
+    fullName?: FullName;
     email: Email;
-    phone: PhoneNumber;
-    nationality: Nationality;
-    country: Country;
+    phone?: PhoneNumber;
+    nationality?: Nationality;
+    country?: Country;
     emailVerifiedAt: Date;
   }): Identity {
     if (!props.emailVerifiedAt) throw new EmailNotVerifiedError();
     const now = new Date();
     return new Identity({
-      ...props,
+      id: props.id,
+      fullName: props.fullName,
+      email: props.email,
+      phone: props.phone,
+      nationality: props.nationality,
+      country: props.country,
+      emailVerifiedAt: props.emailVerifiedAt,
       blnkIdentityRef: undefined,
       createdAt: now,
       updatedAt: now,
@@ -78,11 +84,11 @@ export class Identity {
   static fromPrimitive(data: IdentityPrimitives): Identity {
     return new Identity({
       id: IdentityId.fromPrimitive(data.id),
-      fullName: FullName.fromPrimitive(data.fullName),
+      fullName: data.fullName ? FullName.fromPrimitive(data.fullName) : undefined,
       email: Email.fromPrimitive(data.email),
-      phone: PhoneNumber.fromPrimitive(data.phone),
-      nationality: Nationality.fromPrimitive(data.nationality),
-      country: Country.fromPrimitive(data.country),
+      phone: data.phone ? PhoneNumber.fromPrimitive(data.phone) : undefined,
+      nationality: data.nationality ? Nationality.fromPrimitive(data.nationality) : undefined,
+      country: data.country ? Country.fromPrimitive(data.country) : undefined,
       blnkIdentityRef: data.blnkIdentityRef ? BlnkIdentityRef.fromPrimitive(data.blnkIdentityRef) : undefined,
       emailVerifiedAt: data.emailVerifiedAt,
       createdAt: data.createdAt,
@@ -111,10 +117,10 @@ export class Identity {
 
   getId(): IdentityId { return this.id; }
   getEmail(): Email { return this.email; }
-  getPhone(): PhoneNumber { return this.phone; }
-  getFullName(): FullName { return this.fullName; }
-  getNationality(): Nationality { return this.nationality; }
-  getCountry(): Country { return this.country; }
+  getPhone(): PhoneNumber | undefined { return this.phone; }
+  getFullName(): FullName | undefined { return this.fullName; }
+  getNationality(): Nationality | undefined { return this.nationality; }
+  getCountry(): Country | undefined { return this.country; }
   getBlnkIdentityRef(): BlnkIdentityRef | undefined { return this.blnkIdentityRef; }
   getEmailVerifiedAt(): Date { return this.emailVerifiedAt; }
   getCreatedAt(): Date { return this.createdAt; }
@@ -123,11 +129,11 @@ export class Identity {
   toPrimitive(): IdentityPrimitives {
     return {
       id: this.id.toPrimitive(),
-      fullName: this.fullName.toPrimitive(),
+      fullName: this.fullName?.toPrimitive(),
       email: this.email.toPrimitive(),
-      phone: this.phone.toPrimitive(),
-      nationality: this.nationality.toPrimitive(),
-      country: this.country.toPrimitive(),
+      phone: this.phone?.toPrimitive(),
+      nationality: this.nationality?.toPrimitive(),
+      country: this.country?.toPrimitive(),
       blnkIdentityRef: this.blnkIdentityRef?.toPrimitive(),
       emailVerifiedAt: this.emailVerifiedAt,
       createdAt: this.createdAt,

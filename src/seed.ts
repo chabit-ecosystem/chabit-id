@@ -125,12 +125,7 @@ async function seedUser(
   // Step 3 — run the RegisterSaga (creates identity + credential + USER account + signs in)
   const tokens = await registerSaga.execute({
     verificationId,
-    fullName: user.fullName,
     email: user.email,
-    phone: user.phone,
-    nationality: user.nationality,
-    country: user.country,
-    username: user.username,
     password: user.password,
   });
 

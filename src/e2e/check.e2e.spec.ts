@@ -22,7 +22,12 @@ describe('Check Endpoints E2E', () => {
   });
 
   it('GET /check/username returns available:false for taken username', async () => {
-    await registerTestUser(app, emailSender, { username: 'takenuser' });
+    const { identityRef } = await registerTestUser(app, emailSender);
+    await app.request('/auth/change-username', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'x-identity-ref': identityRef },
+      body: JSON.stringify({ newUsername: 'takenuser' }),
+    });
     const res = await app.request('/check/username?value=takenuser');
     expect(res.status).toBe(200);
     const body = await res.json() as { available: boolean };
@@ -83,13 +88,6 @@ describe('Check Endpoints E2E', () => {
     expect(body.available).toBe(true);
   });
 
-  it('GET /check/phone returns available:false for taken phone', async () => {
-    await registerTestUser(app, emailSender, { phone: '1234567890' });
-    const res = await app.request('/check/phone?value=1234567890');
-    expect(res.status).toBe(200);
-    const body = await res.json() as { available: boolean };
-    expect(body.available).toBe(false);
-  });
 
   it('GET /check/phone returns 400 for invalid phone format', async () => {
     const res = await app.request('/check/phone?value=abc');

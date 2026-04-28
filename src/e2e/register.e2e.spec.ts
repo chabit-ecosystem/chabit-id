@@ -27,16 +27,10 @@ describe('Registration E2E', () => {
       headers: HEADERS,
       body: JSON.stringify({
         verificationId: 9999,
-        fullName: 'Test User',
         email: 'ghost@example.com',
-        phone: '1234567890',
-        nationality: 'Argentine',
-        country: 'Argentina',
-        username: 'ghostuser',
         password: 'password123',
       }),
     });
-    // verificationId doesn't exist → not found or not verified
     expect(res.status).toBeGreaterThanOrEqual(400);
   });
 
@@ -44,11 +38,7 @@ describe('Registration E2E', () => {
     const res = await app.request('/register', {
       method: 'POST',
       headers: HEADERS,
-      body: JSON.stringify({
-        // missing verificationId and other required fields
-        email: 'incomplete@example.com',
-        username: 'incomplete',
-      }),
+      body: JSON.stringify({ email: 'incomplete@example.com' }),
     });
     expect(res.status).toBe(400);
     const body = await res.json() as { error: string };

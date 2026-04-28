@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { EmailVerificationRepository } from '../../verification/domain/ports/EmailVerificationRepository.port.js';
 import { VerificationId } from '../../verification/domain/value-objects/VerificationId.vo.js';
 import { CreateIdentityUseCase } from '../../identity/application/use-cases/CreateIdentity.usecase.js';
@@ -17,12 +18,7 @@ import type { WebhookSender } from '../../../shared/infrastructure/http/WebhookS
 
 export interface RegisterSagaInput {
   verificationId: number;
-  fullName: string;
   email: string;
-  phone: string;
-  nationality: string;
-  country: string;
-  username: string;
   password: string;
   userAgent?: string;
   ipAddress?: string;
@@ -64,11 +60,7 @@ export class RegisterSaga {
     let identityId: string | undefined;
     try {
       const result = await this.createIdentity.execute({
-        fullName: input.fullName,
         email: input.email,
-        phone: input.phone,
-        nationality: input.nationality,
-        country: input.country,
         emailVerifiedAt,
       });
       identityId = result.identityId;
@@ -86,11 +78,12 @@ export class RegisterSaga {
     }
 
     // ── Step 2: CreateCredential ───────────────────────────────────────
+    const username = 'user_' + randomUUID().replace(/-/g, '').slice(0, 8);
     let credentialId: string | undefined;
     try {
       const result = await this.createCredential.execute({
         identityRef: identityId!,
-        username: input.username,
+        username,
         password: input.password,
       });
       credentialId = result.credentialId;
@@ -136,12 +129,7 @@ export class RegisterSaga {
         void this.webhookSender.send(webhookUrl, {
           event: 'identity.registered',
           identityRef: identityId!,
-          username: input.username,
-          fullName: input.fullName,
           email: input.email,
-          phone: input.phone,
-          nationality: input.nationality,
-          country: input.country,
           registeredAt: new Date().toISOString(),
         }).catch(err => logger.warn({ err }, '[RegisterSaga] webhook failed'));
       }
