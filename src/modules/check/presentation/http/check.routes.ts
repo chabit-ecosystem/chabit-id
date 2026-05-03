@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { rateLimiter } from 'hono-rate-limiter';
+import { rateLimiter, RedisStore } from 'hono-rate-limiter';
+import type { RedisClient } from 'hono-rate-limiter';
 import { usernameCheckSchema, emailCheckSchema, phoneCheckSchema } from './check.schemas.js';
 import type { IdentityRepository } from '../../../identity/domain/ports/IdentityRepository.port.js';
 import type { CredentialRepository } from '../../../credential/domain/ports/CredentialRepository.port.js';
@@ -11,12 +12,15 @@ import { Username } from '../../../credential/domain/value-objects/Username.vo.j
 export function createCheckRoutes(
   identityRepo: IdentityRepository,
   credentialRepo: CredentialRepository,
+  redisClient?: RedisClient | null,
 ): Hono {
   const router = new Hono();
+  const store = redisClient ? new RedisStore({ client: redisClient }) : undefined;
 
   const checkLimiter = rateLimiter({
     windowMs: 60 * 1000,
     limit: 20,
+    store,
     keyGenerator: (c) => c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown',
     message: { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' },
   });

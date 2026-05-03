@@ -6,6 +6,7 @@ import { errorHandler } from './error-handler.js';
 import { createCorsMiddleware } from './cors.middleware.js';
 import { logger } from '../../infrastructure/logger.js';
 import { openApiSpec } from './openapi.js';
+import { getRedisClient } from '../../infrastructure/redis/redisClient.js';
 // Verification
 import { createVerificationRoutes } from '../../../modules/verification/presentation/http/verification.routes.js';
 import { RequestEmailVerificationUseCase } from '../../../modules/verification/application/use-cases/RequestEmailVerification.usecase.js';
@@ -198,7 +199,9 @@ export function createApp(): Hono {
   const webhookSender = new HttpWebhookSender(webhookSecret);
 
   // ── Routes ────────────────────────────────────────────────────────
-  const verificationRoutes = createVerificationRoutes(requestVerification, verifyEmail);
+  const redis = getRedisClient();
+
+  const verificationRoutes = createVerificationRoutes(requestVerification, verifyEmail, redis);
   app.route('/verification', verificationRoutes);
 
   const credentialRoutes = createCredentialRoutes(
@@ -210,6 +213,7 @@ export function createApp(): Hono {
     changeUsernameUseCase,
     resetPasswordUseCase,
     requestVerification,
+    redis,
   );
   app.route('/auth', credentialRoutes);
 
@@ -234,7 +238,7 @@ export function createApp(): Hono {
   const identityRoutes = createIdentityRoutes(getIdentity, getIdentityByEmail, jwtSecret);
   app.route('/identities', identityRoutes);
 
-  const checkRoutes = createCheckRoutes(identityRepo, credentialRepo);
+  const checkRoutes = createCheckRoutes(identityRepo, credentialRepo, redis);
   app.route('/check', checkRoutes);
 
   // ── Registration ──────────────────────────────────────────────────

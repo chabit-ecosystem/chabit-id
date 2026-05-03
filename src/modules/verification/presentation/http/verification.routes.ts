@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
-import { rateLimiter } from 'hono-rate-limiter';
+import { rateLimiter, RedisStore } from 'hono-rate-limiter';
+import type { RedisClient } from 'hono-rate-limiter';
 import { requestVerificationSchema, verifyEmailSchema } from './verification.schemas.js';
 import { RequestEmailVerificationUseCase } from '../../application/use-cases/RequestEmailVerification.usecase.js';
 import { VerifyEmailUseCase } from '../../application/use-cases/VerifyEmail.usecase.js';
@@ -8,12 +9,15 @@ import { VerifyEmailUseCase } from '../../application/use-cases/VerifyEmail.usec
 export function createVerificationRoutes(
   requestUseCase: RequestEmailVerificationUseCase,
   verifyUseCase: VerifyEmailUseCase,
+  redisClient?: RedisClient | null,
 ): Hono {
   const router = new Hono();
+  const store = redisClient ? new RedisStore({ client: redisClient }) : undefined;
 
   const requestLimiter = rateLimiter({
     windowMs: 60 * 1000,
     limit: 3,
+    store,
     keyGenerator: (c) => c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown',
     message: { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' },
   });
@@ -21,6 +25,7 @@ export function createVerificationRoutes(
   const verifyLimiter = rateLimiter({
     windowMs: 60 * 1000,
     limit: 10,
+    store,
     keyGenerator: (c) => c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip') ?? 'unknown',
     message: { error: 'RATE_LIMITED', message: 'Too many requests. Try again later.' },
   });
