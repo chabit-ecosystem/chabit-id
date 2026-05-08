@@ -26,6 +26,8 @@ import { EnableTOTPUseCase } from '../../application/use-cases/EnableTOTP.usecas
 import { VerifyTOTPUseCase } from '../../application/use-cases/VerifyTOTP.usecase.js';
 import { DisableTOTPUseCase } from '../../application/use-cases/DisableTOTP.usecase.js';
 import { addToBlacklist } from '../../../../shared/infrastructure/redis/tokenBlacklist.js';
+import { logger } from '../../../../shared/infrastructure/logger.js';
+import { InvalidCredentialsError, AccountLockedError } from '../../domain/errors/Credential.errors.js';
 
 // NOTE: RevokeToken requires the session ID from the JWT.
 // For now, the route extracts 'x-session-id' header (set by the client from the JWT sid claim).
@@ -75,8 +77,22 @@ export function createCredentialRoutes(
       const body = c.req.valid('json');
       const userAgent = c.req.header('user-agent');
       const ipAddress = c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip');
-      const result = await signInUseCase.execute({ username: body.username, password: body.password, userAgent, ipAddress });
-      return c.json(result, 200);
+      try {
+        const result = await signInUseCase.execute({ username: body.username, password: body.password, userAgent, ipAddress });
+        if ('requires2FA' in result && result.requires2FA) {
+          logger.info({ security: true, event_type: 'LOGIN_2FA_REQUIRED', username: body.username, ip: ipAddress });
+        } else {
+          logger.info({ security: true, event_type: 'LOGIN_SUCCESS', username: body.username, ip: ipAddress });
+        }
+        return c.json(result, 200);
+      } catch (err) {
+        if (err instanceof AccountLockedError) {
+          logger.warn({ security: true, event_type: 'LOGIN_BLOCKED_LOCKED', username: body.username, ip: ipAddress, lockedUntil: err.lockedUntil });
+        } else if (err instanceof InvalidCredentialsError) {
+          logger.warn({ security: true, event_type: 'LOGIN_FAILED', username: body.username, ip: ipAddress });
+        }
+        throw err;
+      }
     },
   );
 
@@ -119,6 +135,7 @@ export function createCredentialRoutes(
     }
 
     await revokeTokenUseCase.execute({ sessionId });
+    logger.info({ security: true, event_type: 'SESSION_REVOKED', sessionId });
     return c.json({ message: 'Signed out successfully' }, 200);
   });
 
@@ -152,6 +169,7 @@ export function createCredentialRoutes(
       return c.json({ error: 'MISSING_HEADERS', message: 'x-identity-ref header is required' }, 400);
     }
     await revokeAllTokensUseCase.execute({ identityRef });
+    logger.warn({ security: true, event_type: 'ALL_SESSIONS_REVOKED', identityRef });
     return c.json({ message: 'All sessions revoked' }, 200);
   });
 
