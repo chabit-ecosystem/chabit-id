@@ -115,6 +115,13 @@ export function createApp(): Hono {
   app.use('*', securityHeadersMiddleware);
 
   // ── Docs ──────────────────────────────────────────────────────────
+  app.get('/docs', async (c, next) => {
+    c.header(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    );
+    await next();
+  });
   app.get('/docs', swaggerUI({ url: '/docs/spec' }));
   app.get('/docs/spec', (c) => {
     const host = c.req.header('host') ?? `localhost:${process.env.PORT ?? 3001}`;
